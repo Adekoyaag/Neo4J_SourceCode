@@ -1,0 +1,89 @@
+
+https://raw.githubusercontent.com/Adekoyaag/BigDataAssementDS/main/ChatMentionTeamChat.csv
+
+LOAD CSV WITH HEADERS FROM "https://raw.githubusercontent.com/" AS line
+MERGE (n:UserChats {Name:line.user_id})
+MERGE (m:UserChats {Name:line.teamchat_session_id})
+MERGE (m) -[:CHAT {Joins_time:line.Joins_time}]-> (n)
+
+
+
+
+
+
+//Finding leaf nodes:
+match (n:UserChats)-[r:CHAT]->(m)
+where not ((m)-->())
+return m
+
+
+//Finding root nodes:
+match (m)-[r:CHAT]->(n:UserChats)
+where not (()-->(m))
+return m
+
+//Counting the number of nodes
+match (n:UserChats)
+return count(n)
+
+
+//Counting the number of edges
+match (n:UserChats)-[r]->()
+return count(r)
+
+
+//Finding root nodes:
+match (m)-[r:CHAT]->(n:UserChats)
+where not (()-->(m))
+return m
+------------------------------------------------------------------
+
+
+
+LOAD CSV WITH HEADERS FROM "https://raw.githubusercontent.com/Adekoyaag/BigDataAssementDS/main/ChatMentionTeamChat.csv" AS line
+MERGE (n:MentionChats {Name:line.chat_item})
+MERGE (m:MentionChats {Name:line.user_id})
+MERGE (m) -[:MENTION {Mention_time:line.Mention_time}]-> (n)
+
+
+//Finding root nodes:
+match (m)-[r:MENTION]->(n:MentionChats)
+where not (()-->(m))
+return m
+
+
+
+
+//Counting the number of nodes
+match (n:MentionChats)
+return count(n)
+
+
+
+//Counting the number of edges
+match (n:MentionChats)-[r]->()
+return count(r)
+
+
+
+//Finding root nodes:
+match (m)-[r:CHAT]->(n:MentionChats)
+where not (()-->(m))
+return m
+
+--------------------------------------------------------------------------------
+How many charts are involved in the conversation
+ 
+match p = (i1)-[:chat*]->(i2)
+return length(p)
+order by length(p) desc limit 1
+
+
+
+match p = (i1)-[:chat*]->(i2)
+where length(p) = 1
+with p
+match (u)-[:Joins_time]->(i)
+where i in nodes(p)
+return count(distinct u)
+
